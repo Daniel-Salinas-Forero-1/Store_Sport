@@ -3,11 +3,14 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Route;
 
 class AppServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Registra cualquier servicio de la aplicación.
+     *
+     * @return void
      */
     public function register(): void
     {
@@ -15,10 +18,19 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Bootstrap any application services.
+     * Arranca cualquier servicio de la aplicación.
+     *
+     * @return void
      */
     public function boot(): void
     {
-        //
+        // Cargar rutas de la API
+        Route::middleware('api')
+            ->prefix('api')
+            ->group(base_path('routes/api.php'));
+
+        // Cargar rutas de la web
+        Route::middleware('web')
+            ->group(base_path('routes/web.php'));
     }
 }
