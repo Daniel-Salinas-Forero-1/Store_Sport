@@ -3,10 +3,15 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\ExportController;
+
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('export/products', [ExportController::class, 'exportProducts']);
+
 
 /**
  * --------------------------------------------------------------------------
