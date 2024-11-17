@@ -6,10 +6,6 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ExportController;
 
 
-Route::get('/', function () {
-    return view('welcome');
-});
-
 Route::get('export/products', [ExportController::class, 'exportProducts']);
 
 
@@ -104,6 +100,30 @@ Route::prefix('products')->group(function () {
      *          500: Error al eliminar el producto.
      */
     Route::delete('/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+
+
+
+
+    /**
+     * @route   POST /products/filter
+     * @name    products.filter
+     * @desc    Filtra los productos según criterios específicos (nombre, categoría, precio, stock).
+     * @acces   Público (o autenticado según los requisitos).
+     * @query   - name (string, opcional): Nombre del producto para realizar la búsqueda.
+     *          - category (string, opcional): Categoría del producto.
+     *          - min_price (numeric, opcional): Precio mínimo del producto.
+     *          - max_price (numeric, opcional): Precio máximo del producto.
+     *          - min_stock (int, opcional): Stock mínimo del producto.
+     *          - max_stock (int, opcional): Stock máximo del producto.
+     * @returns JSON con la lista de productos que cumplen los filtros.
+     *          - success: indica si la operación fue exitosa.
+     *          - message: mensaje descriptivo del resultado.
+     *          - data: lista de productos filtrados.
+     * @errors  500: Error interno del servidor.
+     */
+    Route::post('/filter', [ProductController::class, 'filter']);
+
 });
 
 

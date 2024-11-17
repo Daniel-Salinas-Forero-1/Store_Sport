@@ -201,51 +201,75 @@ class OrderController extends Controller
         }
     }
 
-    /**
-     * Filtra las órdenes según criterios específicos.
+        /**
+     * Filtra las órdenes según criterios específicos enviados en la solicitud.
      *
-     * @param \Illuminate\Http\Request $request Criterios de filtrado.
-     * @return \Illuminate\Http\JsonResponse
+     * Esta función permite filtrar las órdenes de la base de datos utilizando varios parámetros opcionales:
+     * - `start_date`: Filtra las órdenes cuyo `created_at` sea mayor o igual a esta fecha.
+     * - `end_date`: Filtra las órdenes cuyo `created_at` sea menor o igual a esta fecha.
+     * - `status`: Filtra las órdenes según su estado. Los valores permitidos son `pending`, `completed` o `canceled`.
+     * - `user_id`: Filtra las órdenes asociadas a un usuario específico, mediante su `id`.
+     *
+     * Los filtros se aplican solo si los parámetros correspondientes son enviados en la solicitud.
+     * Si no se envían algunos de los parámetros, esos filtros no se aplicarán.
+     *
+     * Si la solicitud se procesa correctamente, se devolverá un objeto JSON con las órdenes filtradas junto con los productos relacionados.
+     * Si ocurre un error en el proceso de filtrado, se devolverá un mensaje de error.
+     *
+     * @param \Illuminate\Http\Request $request Los criterios de filtrado proporcionados en la solicitud.
+     * 
+     * @return \Illuminate\Http\JsonResponse Respuesta en formato JSON con el resultado del filtrado.
+     * 
+     * @throws \Exception Si ocurre un error durante el filtrado de las órdenes, se maneja y retorna un error genérico.
      */
     public function filter(Request $request)
     {
+        // Validación de los parámetros de la solicitud
         $validated = $request->validate([
-            'start_date' => 'nullable|date',
-            'end_date' => 'nullable|date',
-            'status' => 'nullable|string|in:pending,completed,canceled',
-            'user_id' => 'nullable|exists:users,id'
+            'start_date' => 'nullable|date',       // Fecha de inicio, formato de fecha válido
+            'end_date' => 'nullable|date',         // Fecha de fin, formato de fecha válido
+            'status' => 'nullable|string|in:pending,completed,canceled', // Estado de la orden (pendiente, completada, cancelada)
+            'user_id' => 'nullable|exists:users,id' // ID de usuario, debe existir en la tabla de usuarios
         ]);
 
         try {
+            // Inicia una consulta a la base de datos para las órdenes
             $orders = Order::query();
 
+            // Aplica el filtro por `start_date` si se ha enviado
             if ($request->filled('start_date')) {
                 $orders->where('created_at', '>=', $validated['start_date']);
             }
 
+            // Aplica el filtro por `end_date` si se ha enviado
             if ($request->filled('end_date')) {
                 $orders->where('created_at', '<=', $validated['end_date']);
             }
 
+            // Aplica el filtro por `status` si se ha enviado
             if ($request->filled('status')) {
                 $orders->where('status', $validated['status']);
             }
 
+            // Aplica el filtro por `user_id` si se ha enviado
             if ($request->filled('user_id')) {
                 $orders->where('user_id', $validated['user_id']);
             }
 
+            // Devuelve las órdenes filtradas junto con los productos asociados en formato JSON
             return response()->json([
                 'success' => true,
                 'message' => 'Órdenes filtradas exitosamente.',
-                'data' => $orders->with('products')->get()
+                'data' => $orders->with('products')->get() // Incluye los productos relacionados
             ], 200);
         } catch (\Exception $e) {
+            // En caso de error, devuelve un mensaje de error
             return response()->json([
                 'success' => false,
                 'message' => 'Error al filtrar las órdenes.'
             ], 500);
         }
     }
+
 }
 
