@@ -5,18 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-/**
- * Modelo Product para gestionar los datos del catálogo de productos.
- */
 class Product extends Model
 {
     use HasFactory;
 
-    /**
-     * Los atributos que son asignables masivamente.
-     *
-     * @var array
-     */
     protected $fillable = [
         'name',
         'description',
@@ -24,4 +16,14 @@ class Product extends Model
         'stock',
         'category',
     ];
+
+    /**
+     * Relación con órdenes (muchos a muchos) a través de la tabla intermedia.
+     */
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class, 'order_product')
+                    ->withPivot('quantity', 'price')
+                    ->withTimestamps();
+    }
 }
